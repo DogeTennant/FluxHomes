@@ -27,7 +27,7 @@ A modern, feature-rich homes plugin for Paper/Spigot/Purpur servers. Clean code,
 
 ## Installation
 
-1. Download the latest release from the [Releases](../../releases) page
+1. Download the latest release from [Polymart](https://polymart.org/product/9504/fluxhomes)
 2. Drop the jar into your `plugins/` folder
 3. Restart the server
 4. Edit `plugins/FluxHomes/config.yml` to your liking
