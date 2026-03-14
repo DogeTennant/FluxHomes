@@ -1,6 +1,6 @@
 # FluxHomes
 
-A modern, feature-rich homes plugin for Paper/Spigot servers. Clean code, translation support, and a settings GUI included out of the box.
+A modern, feature-rich homes plugin for Paper/Spigot/Purpur servers. Clean code, translation support, and a settings GUI included out of the box.
 
 ## Features
 
