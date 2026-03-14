@@ -1,0 +1,62 @@
+# FluxHomes Zprávy
+# Podporuje MiniMessage formátování: https://docs.advntr.dev/minimessage/format.html
+
+prefix: "<gray>[<aqua>FluxHomes</aqua>]</gray> "
+
+help-header: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Příkazy:</green>"
+help-sethome: " <aqua>/sethome [název] <gray>- Nastav domov na tvém místě."
+help-home: " <aqua>/home [název] <gray>- Teleportuj se na domov."
+help-delhome: " <aqua>/delhome <název> <gray>- Smaž domov."
+help-homes: " <aqua>/homes <gray>- Zobraz seznam tvých domovů."
+
+home-set: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Domov <white>{home}</white> byl nastaven.</green>"
+home-deleted: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Domov <white>{home}</white> byl smazán.</green>"
+home-delete-confirm: "<gray>[<aqua>FluxHomes</aqua>]</gray> <yellow>Opravdu chceš smazat <white>{home}</white>? Spusť příkaz znovu pro potvrzení."
+home-delete-cancelled: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>Mazání domova bylo zrušeno."
+home-not-found: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>Domov <white>{home}</white> nebyl nalezen.</red>"
+home-world-blocked: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>V tomto světě nemůžeš nastavit domov.</red>"
+home-limit-reached: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>Dosáhl jsi limitu domovů: <white>{limit}</white>.</red>"
+home-list-header: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Tvoje domovy:</green>"
+home-list-entry: "<gray> - <white>{home}</white></gray>"
+home-list-empty: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>Nemáš žádné domovy.</red>"
+
+teleport-success: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Teleportován na <white>{home}</white>.</green>"
+world-not-found: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>Svět, ve kterém se tento domov nachází, již neexistuje.</red>"
+
+warmup-start: "<gray>[<aqua>FluxHomes</aqua>]</gray> <yellow>Teleportace za <white>{seconds}</white> sekund, nehýbej se.</yellow>"
+warmup-cancelled: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>Teleportace byla zrušena, protože ses pohnul.</red>"
+cooldown: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>Musíš počkat <white>{seconds}</white> sekund před další teleportací.</red>"
+
+admin-help-header: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Adminské příkazy:</green>"
+admin-help-delhome: " <aqua>/homesadmin delhome <white><hráč> <domov> <gray>- Smaž domov hráče."
+admin-help-listhomes: " <aqua>/homesadmin listhomes <white><hráč> <gray>- Zobraz domovy hráče."
+admin-help-clearhomes: " <aqua>/homesadmin clearhomes <white><hráč> <gray>- Smaž všechny domovy hráče."
+admin-help-settings: " <aqua>/homesadmin settings <gray>- Otevři nastavení GUI."
+admin-help-language: " <aqua>/homesadmin language <white>[název] <gray>- Změň aktivní jazyk."
+admin-help-reload: " <aqua>/homesadmin reload <gray>- Znovu načti konfiguraci a překlady."
+admin-help-import: " <aqua>/homesadmin import <white><zdroj> <gray>- Importuj domovy z jiného pluginu."
+
+admin-home-deleted: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Domov <white>{home}</white> hráče <white>{player}</white> byl smazán.</green>"
+admin-home-list-header: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Domovy hráče <white>{player}</white>:</green>"
+admin-no-homes: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>Hráč <white>{player}</white> nemá žádné domovy.</red>"
+admin-homes-cleared: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Všechny domovy hráče <white>{player}</white> byly smazány.</green>"
+admin-language-list: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Dostupné jazyky: <white>{languages}</white>. Aktuální: <white>{current}</white>.</green>"
+admin-language-changed: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Jazyk byl změněn na <white>{language}</white>.</green>"
+admin-language-not-found: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>Jazyk <white>{language}</white> nebyl nalezen ve složce překlady.</red>"
+admin-reloaded: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Konfigurace a překlady byly znovu načteny.</green>"
+admin-import-started: "<gray>[<aqua>FluxHomes</aqua>]</gray> <yellow>Spouštím import z EssentialsX, prosím čekej..."
+admin-import-complete: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Import dokončen! Importováno <white>{count}</white> domovů.</green>"
+admin-import-not-found: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>Složka EssentialsX userdata nebyla nalezena. Je EssentialsX nainstalován?"
+
+gui-blocked-worlds-add-prompt: "<gray>[<aqua>FluxHomes</aqua>]</gray> <yellow>Napiš název světa, který chceš přidat, nebo <white>cancel</white> pro návrat."
+gui-blocked-worlds-remove-prompt: "<gray>[<aqua>FluxHomes</aqua>]</gray> <yellow>Napiš název světa, který chceš odebrat, nebo <white>cancel</white> pro návrat."
+gui-blocked-worlds-cancel-hint: "<gray>[<aqua>FluxHomes</aqua>]</gray> <gray>Názvy světů rozlišují velká a malá písmena."
+gui-blocked-worlds-cancelled: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>Zrušeno."
+gui-blocked-worlds-added: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Svět <white>{world}</white> byl přidán do seznamu blokovaných světů."
+gui-blocked-worlds-removed: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Svět <white>{world}</white> byl odebrán ze seznamu blokovaných světů."
+gui-blocked-worlds-already-added: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>Svět <white>{world}</white> je již v seznamu blokovaných světů."
+gui-blocked-worlds-not-found: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>Svět <white>{world}</white> nebyl nalezen v seznamu blokovaných světů."
+
+no-permission: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>Nemáš oprávnění provést tuto akci.</red>"
+player-only: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>Tento příkaz může používat pouze hráč.</red>"
+player-not-found: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>Hráč <white>{player}</white> nebyl nalezen.</red>"

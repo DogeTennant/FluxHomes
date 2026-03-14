@@ -1,0 +1,62 @@
+# FluxHomes Messages
+# Supports MiniMessage formatting: https://docs.advntr.dev/minimessage/format.html
+
+prefix: "<gray>[<aqua>FluxHomes</aqua>]</gray> "
+
+help-header: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Commands:</green>"
+help-sethome: " <aqua>/sethome [name] <gray>- Set a home at your location."
+help-home: " <aqua>/home [name] <gray>- Teleport to a home."
+help-delhome: " <aqua>/delhome <name> <gray>- Delete a home."
+help-homes: " <aqua>/homes <gray>- List all your homes."
+
+home-set: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Home <white>{home}</white> has been set.</green>"
+home-deleted: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Home <white>{home}</white> has been deleted.</green>"
+home-delete-confirm: "<gray>[<aqua>FluxHomes</aqua>]</gray> <yellow>Are you sure you want to delete <white>{home}</white>? Run the command again to confirm."
+home-delete-cancelled: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>Home deletion cancelled."
+home-not-found: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>Home <white>{home}</white> not found.</red>"
+home-world-blocked: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>You cannot set homes in this world.</red>"
+home-limit-reached: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>You have reached your home limit of <white>{limit}</white>.</red>"
+home-list-header: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Your homes:</green>"
+home-list-entry: "<gray> - <white>{home}</white></gray>"
+home-list-empty: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>You have no homes set.</red>"
+
+teleport-success: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Teleported to <white>{home}</white>.</green>"
+world-not-found: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>The world this home is in no longer exists.</red>"
+
+warmup-start: "<gray>[<aqua>FluxHomes</aqua>]</gray> <yellow>Teleporting in <white>{seconds}</white> seconds, don't move.</yellow>"
+warmup-cancelled: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>Teleportation cancelled because you moved.</red>"
+cooldown: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>You must wait <white>{seconds}</white> seconds before teleporting again.</red>"
+
+admin-help-header: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Admin Commands:</green>"
+admin-help-delhome: " <aqua>/homesadmin delhome <white><player> <home> <gray>- Delete a player's home."
+admin-help-listhomes: " <aqua>/homesadmin listhomes <white><player> <gray>- List a player's homes."
+admin-help-clearhomes: " <aqua>/homesadmin clearhomes <white><player> <gray>- Clear all of a player's homes."
+admin-help-settings: " <aqua>/homesadmin settings <gray>- Open the settings GUI."
+admin-help-language: " <aqua>/homesadmin language <white>[name] <gray>- Change the active language."
+admin-help-reload: " <aqua>/homesadmin reload <gray>- Reload config and translations."
+
+admin-home-deleted: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Deleted home <white>{home}</white> for <white>{player}</white>.</green>"
+admin-home-list-header: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Homes for <white>{player}</white>:</green>"
+admin-no-homes: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red><white>{player}</white> has no homes.</red>"
+admin-homes-cleared: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Cleared all homes for <white>{player}</white>.</green>"
+admin-language-list: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Available languages: <white>{languages}</white>. Current: <white>{current}</white>.</green>"
+admin-language-changed: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Language changed to <white>{language}</white>.</green>"
+admin-language-not-found: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>Language <white>{language}</white> not found in the translations folder.</red>"
+admin-reloaded: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Configuration and translations reloaded.</green>"
+admin-import-started: "<gray>[<aqua>FluxHomes</aqua>]</gray> <yellow>Starting EssentialsX import, please wait..."
+admin-import-complete: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Import complete! Imported <white>{count}</white> homes."
+admin-import-not-found: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>EssentialsX userdata folder not found. Is EssentialsX installed?"
+admin-help-import: " <aqua>/homesadmin import <white><source> <gray>- Import homes from another plugin."
+
+gui-blocked-worlds-add-prompt: "<gray>[<aqua>FluxHomes</aqua>]</gray> <yellow>Type the name of the world you want to add, or <white>cancel</white> to go back."
+gui-blocked-worlds-remove-prompt: "<gray>[<aqua>FluxHomes</aqua>]</gray> <yellow>Type the name of the world you want to remove, or <white>cancel</white> to go back."
+gui-blocked-worlds-cancel-hint: "<gray>[<aqua>FluxHomes</aqua>]</gray> <gray>World names are case-sensitive."
+gui-blocked-worlds-cancelled: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>Cancelled."
+gui-blocked-worlds-added: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Added <white>{world}</white> to the blocked worlds list."
+gui-blocked-worlds-removed: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Removed <white>{world}</white> from the blocked worlds list."
+gui-blocked-worlds-already-added: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red><white>{world}</white> is already in the blocked worlds list."
+gui-blocked-worlds-not-found: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red><white>{world}</white> is not in the blocked worlds list."
+
+no-permission: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>You don't have permission to do that.</red>"
+player-only: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>This command can only be used by players.</red>"
+player-not-found: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>Player <white>{player}</white> not found.</red>"

@@ -1,0 +1,44 @@
+name: FluxHomes
+version: 1.0.0
+main: com.dogetennant.fluxhomes.FluxHomes
+api-version: '1.21'
+author: DogeTennant
+description: A modern, feature-rich homes plugin.
+
+commands:
+  home:
+    description: Teleport to a home.
+    usage: /home [name]
+  sethome:
+    description: Set a home at your current location.
+    usage: /sethome [name]
+  delhome:
+    description: Delete a home.
+    usage: /delhome <name>
+  homes:
+    description: List all your homes.
+    usage: /homes
+  homesadmin:
+    description: Admin home management commands.
+    usage: /homesadmin <delhome|listhomes|clearhomes|reload> [player] [home]
+    permission: fluxhomes.admin
+
+permissions:
+  fluxhomes.home:
+    description: Allows teleporting to a home.
+    default: true
+  fluxhomes.sethome:
+    description: Allows setting a home.
+    default: true
+  fluxhomes.delhome:
+    description: Allows deleting a home.
+    default: true
+  fluxhomes.homes:
+    description: Allows listing homes.
+    default: true
+  fluxhomes.admin:
+    description: Allows admin home commands.
+    default: op
+  fluxhomes.homes.unlimited:
+    description: Allows unlimited homes.
+    default: op

@@ -1,0 +1,49 @@
+# FluxHomes Configuration
+
+# Storage type: sqlite or mysql
+storage-type: sqlite
+
+# Language file to use from the translations folder (e.g. en_us, cs_cz)
+language: en_us
+
+# Maximum homes for players without a specific permission
+max-homes:
+  default: 3
+
+# Cooldown between teleports
+cooldown:
+  enabled: true
+  seconds: 5
+
+# Warmup before teleporting (player must stand still)
+warmup:
+  enabled: true
+  seconds: 3
+
+# Play enderman teleport sound on home teleport
+teleport-sound:
+  enabled: true
+
+# Respawn players at their home named "home" on death
+respawn-at-home:
+  enabled: false
+
+# Require players to confirm home deletion by running the command twice
+confirm-deletion:
+  enabled: true
+  timeout: 30
+
+# Worlds where players are not allowed to set homes
+blocked-worlds:
+  enabled: false
+  worlds:
+    - world_example
+    - resource_world
+
+# MySQL settings (only used if storage-type is mysql)
+mysql:
+  host: localhost
+  port: 3306
+  database: minecraft
+  username: root
+  password: ''
