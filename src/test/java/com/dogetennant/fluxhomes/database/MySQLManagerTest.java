@@ -5,6 +5,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Path;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -18,13 +23,26 @@ class MySQLManagerTest extends DatabaseManagerContractTest {
     Path dataFolder;
 
     @Override
-    protected DatabaseManager open() throws Exception {
-        return TestPlugin.h2MySql(TestPlugin.mockPlugin(dataFolder, dataFolder));
+    protected DatabaseManager open(String prefix) throws Exception {
+        return TestPlugin.h2MySql(TestPlugin.mockPlugin(dataFolder, dataFolder, prefix));
     }
 
-    /** Documents current behaviour: see docs/problems/fluxhomes-long-home-names-lost-on-mysql.md. */
+    @Override
+    protected List<String> tables(DatabaseManager manager) throws Exception {
+        List<String> names = new ArrayList<>();
+        try (Connection con = manager.dataSource.getConnection();
+             ResultSet rs = con.getMetaData().getTables(null, null, "%", new String[] {"TABLE", "BASE TABLE"})) {
+            while (rs.next()) names.add(rs.getString("TABLE_NAME").toLowerCase(Locale.ROOT));
+        }
+        return names;
+    }
+
+    /**
+     * The column holds 32 characters, which is why {@code /sethome} refuses longer names
+     * ({@code HomeManager#MAX_NAME_LENGTH}).
+     */
     @Test
-    void homeNamesLongerThan32CharactersAreNotSaved() {
+    void theNameColumnHolds32Characters() {
         db.saveHome(home(ALEX, "a".repeat(32), "world", 1));
         db.saveHome(home(ALEX, "a".repeat(33), "world", 1));
 

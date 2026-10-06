@@ -1,7 +1,7 @@
 name: FluxHomes
-version: 1.0.0
+version: '${project.version}'
 main: com.dogetennant.fluxhomes.FluxHomes
-api-version: '26.1'
+api-version: '1.21'
 author: DogeTennant
 description: A modern, feature-rich homes plugin.
 

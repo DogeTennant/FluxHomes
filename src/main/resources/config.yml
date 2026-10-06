@@ -3,6 +3,11 @@
 # Storage type: sqlite or mysql
 storage-type: sqlite
 
+# Prefix added to the table name (the table is <prefix>homes).
+# Set one (e.g. "fh_") when FluxHomes shares a MySQL database with other plugins.
+# Changing it later starts with an empty table - rename the old table yourself.
+table-prefix: ""
+
 # Language file to use from the translations folder (e.g. en_us, cs_cz)
 language: en_us
 

@@ -15,6 +15,10 @@ import com.dogetennant.fluxhomes.commands.AdminHomeCommand;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import java.io.InputStream;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 
 public class FluxHomes extends JavaPlugin {
 
@@ -23,6 +27,8 @@ public class FluxHomes extends JavaPlugin {
     private DatabaseManager database;
     private CooldownManager cooldownManager;
     private HomeManager homeManager;
+    /** All database work, one task at a time and in order. */
+    private ExecutorService databaseThread;
 
     @Override
     public void onEnable() {
@@ -40,11 +46,30 @@ public class FluxHomes extends JavaPlugin {
         } else {
             database = new SQLiteManager(this);
         }
-        database.initialize();
+        try {
+            database.initialize();
+        } catch (Exception e) {
+            getLogger().log(Level.SEVERE, "Could not connect to the database - FluxHomes is disabled. "
+                    + "Check storage-type and the mysql section in config.yml.", e);
+            database = null;
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
+        databaseThread = Executors.newSingleThreadExecutor(task -> {
+            Thread thread = new Thread(task, "FluxHomes-Database");
+            thread.setDaemon(true);
+            return thread;
+        });
 
         // Initialize managers
         cooldownManager = new CooldownManager();
-        homeManager = new HomeManager(this, database, cooldownManager);
+        homeManager = new HomeManager(this, database, cooldownManager, databaseThread,
+                task -> {
+                    if (isEnabled()) getServer().getScheduler().runTask(this, task);
+                },
+                uuid -> getServer().getPlayer(uuid) != null);
+        // players already online (plugin reload) get their homes loaded now
+        getServer().getOnlinePlayers().forEach(player -> homeManager.loadInBackground(player.getUniqueId()));
 
         // Register listeners
         getServer().getPluginManager().registerEvents(new PlayerListener(this), this);
@@ -63,8 +88,8 @@ public class FluxHomes extends JavaPlugin {
         getCommand("homesadmin").setExecutor(adminCommand);
         getCommand("homesadmin").setTabCompleter(adminCommand);
 
-        // Schedule cooldown cleanup every 5 minutes
-        getServer().getScheduler().runTaskTimerAsynchronously(this,
+        // Schedule cooldown cleanup every 5 minutes (on the main thread, like every other cooldown access)
+        getServer().getScheduler().runTaskTimer(this,
                 () -> cooldownManager.cleanup(), 6000L, 6000L);
 
         getLogger().info("FluxHomes has been enabled!");
@@ -94,6 +119,17 @@ public class FluxHomes extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        if (databaseThread != null) {
+            // let queued saves and deletes finish before the pool closes
+            databaseThread.shutdown();
+            try {
+                if (!databaseThread.awaitTermination(10, TimeUnit.SECONDS)) {
+                    getLogger().warning("Some home changes were still being saved when the server stopped.");
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
         if (database != null) {
             database.shutdown();
         }

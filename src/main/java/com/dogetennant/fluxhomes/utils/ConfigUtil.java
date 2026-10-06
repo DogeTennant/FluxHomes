@@ -15,6 +15,10 @@ public class ConfigUtil {
         return plugin.getConfig().getString("storage-type", "sqlite").toLowerCase();
     }
 
+    public String getTablePrefix() {
+        return plugin.getConfig().getString("table-prefix", "");
+    }
+
     public int getMaxHomes(String permissionGroup) {
         return plugin.getConfig().getInt("max-homes.default", 3);
     }

@@ -4,7 +4,6 @@ import com.dogetennant.fluxhomes.FluxHomes;
 import com.dogetennant.fluxhomes.models.Home;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -13,6 +12,8 @@ import org.bukkit.entity.Player;
 import com.dogetennant.fluxhomes.gui.SettingsGUI;
 
 import java.util.List;
+import java.util.UUID;
+import java.util.function.Consumer;
 
 public class AdminHomeCommand implements CommandExecutor, TabCompleter {
 
@@ -65,10 +66,12 @@ public class AdminHomeCommand implements CommandExecutor, TabCompleter {
             return;
         }
 
-        OfflinePlayer target = Bukkit.getOfflinePlayer(args[1]);
         String homeName = args[2].toLowerCase();
-        boolean success = plugin.getHomeManager().deleteHome(target.getUniqueId(), homeName);
+        withTarget(args[1], target -> plugin.getHomeManager().deleteHome(target, homeName,
+                success -> adminDeleted(sender, args, homeName, success)));
+    }
 
+    private void adminDeleted(CommandSender sender, String[] args, String homeName, boolean success) {
         if (sender instanceof Player player) {
             if (success) {
                 plugin.getMessageUtil().send(player, "admin-home-deleted",
@@ -89,9 +92,11 @@ public class AdminHomeCommand implements CommandExecutor, TabCompleter {
             return;
         }
 
-        OfflinePlayer target = Bukkit.getOfflinePlayer(args[1]);
-        List<Home> homes = plugin.getHomeManager().getHomes(target.getUniqueId());
+        withTarget(args[1], target -> plugin.getHomeManager().getHomes(target,
+                homes -> adminListed(sender, args, homes)));
+    }
 
+    private void adminListed(CommandSender sender, String[] args, List<Home> homes) {
         if (sender instanceof Player player) {
             if (homes.isEmpty()) {
                 plugin.getMessageUtil().send(player, "admin-no-homes", "{player}", args[1]);
@@ -117,14 +122,15 @@ public class AdminHomeCommand implements CommandExecutor, TabCompleter {
             return;
         }
 
-        OfflinePlayer target = Bukkit.getOfflinePlayer(args[1]);
-        plugin.getHomeManager().deleteAllHomes(target.getUniqueId());
+        withTarget(args[1], target -> {
+            plugin.getHomeManager().deleteAllHomes(target);
 
-        if (sender instanceof Player player) {
-            plugin.getMessageUtil().send(player, "admin-homes-cleared", "{player}", args[1]);
-        } else {
-            sender.sendMessage("Cleared all homes for " + args[1] + ".");
-        }
+            if (sender instanceof Player player) {
+                plugin.getMessageUtil().send(player, "admin-homes-cleared", "{player}", args[1]);
+            } else {
+                sender.sendMessage("Cleared all homes for " + args[1] + ".");
+            }
+        });
     }
 
     private void handleAdminTpHome(CommandSender sender, String[] args) {
@@ -137,24 +143,37 @@ public class AdminHomeCommand implements CommandExecutor, TabCompleter {
             return;
         }
 
-        OfflinePlayer target = Bukkit.getOfflinePlayer(args[1]);
         String homeName = args.length >= 3 ? args[2].toLowerCase() : "home";
-        Home home = plugin.getHomeManager().getHome(target.getUniqueId(), homeName);
+        teleportToHomeOf(player, args[1], homeName);
+    }
 
-        if (home == null) {
-            plugin.getMessageUtil().send(player, "home-not-found", "{home}", homeName);
-            return;
-        }
+    /** Teleports the staff member to the home of another player (online or not). */
+    private void teleportToHomeOf(Player player, String targetName, String homeName) {
+        withTarget(targetName, target -> plugin.getHomeManager().getHome(target, homeName, home -> {
+            if (!player.isOnline()) return;
+            if (home == null) {
+                plugin.getMessageUtil().send(player, "home-not-found", "{home}", homeName);
+                return;
+            }
 
-        Location loc = home.toLocation();
-        if (loc == null) {
-            plugin.getMessageUtil().send(player, "world-not-found");
-            return;
-        }
+            Location loc = home.toLocation();
+            if (loc.getWorld() == null) {
+                plugin.getMessageUtil().send(player, "world-not-found");
+                return;
+            }
 
-        player.teleport(loc);
-        plugin.getMessageUtil().send(player, "admin-tp-success",
-                "{home}", homeName, "{player}", args[1]);
+            player.teleport(loc);
+            plugin.getMessageUtil().send(player, "admin-tp-success",
+                    "{home}", homeName, "{player}", targetName);
+        }));
+    }
+
+    /**
+     * Resolves a player name to their UUID off the main thread ({@code getOfflinePlayer} may ask
+     * Mojang about unknown names), then runs {@code then} on the main thread.
+     */
+    private void withTarget(String name, Consumer<UUID> then) {
+        plugin.getHomeManager().inBackground(() -> Bukkit.getOfflinePlayer(name).getUniqueId(), then);
     }
 
     private void handleImplicitTp(CommandSender sender, String[] args) {
@@ -163,24 +182,8 @@ public class AdminHomeCommand implements CommandExecutor, TabCompleter {
             return;
         }
 
-        OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
         String homeName = args.length >= 2 ? args[1].toLowerCase() : "home";
-        Home home = plugin.getHomeManager().getHome(target.getUniqueId(), homeName);
-
-        if (home == null) {
-            plugin.getMessageUtil().send(player, "home-not-found", "{home}", homeName);
-            return;
-        }
-
-        Location loc = home.toLocation();
-        if (loc == null) {
-            plugin.getMessageUtil().send(player, "world-not-found");
-            return;
-        }
-
-        player.teleport(loc);
-        plugin.getMessageUtil().send(player, "admin-tp-success",
-                "{home}", homeName, "{player}", args[0]);
+        teleportToHomeOf(player, args[0], homeName);
     }
 
     private void handleAdminReload(CommandSender sender) {
@@ -248,9 +251,8 @@ public class AdminHomeCommand implements CommandExecutor, TabCompleter {
         if (args.length == 2) {
             if (!isSubcommand) {
                 // Implicit tp: args[0] is a player name, complete home names
-                OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
                 String partial = args[1].toLowerCase();
-                return plugin.getHomeManager().getHomes(target.getUniqueId())
+                return cachedHomesOf(args[0])
                         .stream()
                         .map(Home::getName)
                         .filter(name -> name.startsWith(partial))
@@ -275,9 +277,8 @@ public class AdminHomeCommand implements CommandExecutor, TabCompleter {
 
         if (args.length == 3 && isSubcommand
                 && (sub.equals("del") || sub.equals("delhome") || sub.equals("tp"))) {
-            OfflinePlayer target = Bukkit.getOfflinePlayer(args[1]);
             String partial = args[2].toLowerCase();
-            return plugin.getHomeManager().getHomes(target.getUniqueId())
+            return cachedHomesOf(args[1])
                     .stream()
                     .map(Home::getName)
                     .filter(name -> name.startsWith(partial))
@@ -343,32 +344,28 @@ public class AdminHomeCommand implements CommandExecutor, TabCompleter {
             sender.sendMessage("Starting EssentialsX import, please wait...");
         }
 
-        // Run async since it could be reading hundreds of files
-        new org.bukkit.scheduler.BukkitRunnable() {
-            @Override
-            public void run() {
-                int count = plugin.getHomeManager().importFromEssentialsX();
-
-                new org.bukkit.scheduler.BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        if (count == -1) {
-                            if (sender instanceof Player player) {
-                                plugin.getMessageUtil().send(player, "admin-import-not-found");
-                            } else {
-                                sender.sendMessage("EssentialsX userdata folder not found.");
-                            }
-                        } else {
-                            if (sender instanceof Player player) {
-                                plugin.getMessageUtil().send(player, "admin-import-complete",
-                                        "{count}", String.valueOf(count));
-                            } else {
-                                sender.sendMessage("Import complete. Imported " + count + " homes.");
-                            }
-                        }
-                    }
-                }.runTask(plugin);
+        // Runs on the database thread since it could be reading hundreds of files
+        plugin.getHomeManager().importFromEssentialsX(count -> {
+            if (count == -1) {
+                if (sender instanceof Player player) {
+                    plugin.getMessageUtil().send(player, "admin-import-not-found");
+                } else {
+                    sender.sendMessage("EssentialsX userdata folder not found.");
+                }
+            } else {
+                if (sender instanceof Player player) {
+                    plugin.getMessageUtil().send(player, "admin-import-complete",
+                            "{count}", String.valueOf(count));
+                } else {
+                    sender.sendMessage("Import complete. Imported " + count + " homes.");
+                }
             }
-        }.runTaskAsynchronously(plugin);
+        });
+    }
+
+    /** Homes of an online player for tab completion (never waits for the database). */
+    private List<Home> cachedHomesOf(String name) {
+        Player online = Bukkit.getPlayerExact(name);
+        return online == null ? List.of() : plugin.getHomeManager().cachedHomes(online.getUniqueId()).orElse(List.of());
     }
 }

@@ -15,6 +15,7 @@ home-delete-confirm: "<gray>[<aqua>FluxHomes</aqua>]</gray> <yellow>Opravdu chce
 home-delete-cancelled: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>Mazání domova bylo zrušeno."
 home-not-found: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>Domov <white>{home}</white> nebyl nalezen.</red>"
 home-world-blocked: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>V tomto světě nemůžeš nastavit domov.</red>"
+home-name-too-long: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>Název domova může mít nejvýše <white>{max}</white> znaků.</red>"
 home-limit-reached: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>Dosáhl jsi limitu domovů: <white>{limit}</white>.</red>"
 home-list-header: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Tvoje domovy:</green>"
 home-list-entry: "<gray> - <white>{home}</white></gray>"

@@ -76,6 +76,10 @@ A modern, feature-rich homes plugin for Paper/Spigot/Purpur servers. Clean code,
 # Storage type: sqlite or mysql
 storage-type: sqlite
 
+# Prefix added to the table name (the table is <prefix>homes).
+# Set one (e.g. "fh_") when FluxHomes shares a MySQL database with other plugins.
+table-prefix: ""
+
 # Language file to use from the translations folder (e.g. en_us, cs_cz)
 language: en_us
 
@@ -125,6 +129,14 @@ mysql:
 ## MySQL and MariaDB
 
 Set `storage-type: mysql` in `config.yml` and fill in your database credentials. MariaDB is fully supported since it uses the same connector as MySQL.
+
+If the database is shared with other plugins, set a `table-prefix` (for example `fh_`) so the table
+becomes `fh_homes` instead of `homes`. Changing the prefix later starts with an empty table: rename
+the old table yourself (`RENAME TABLE homes TO fh_homes`).
+
+Connections come from a small HikariCP pool, and all database work runs on a background thread:
+a player's homes are loaded while they log in, so `/home`, `/homes`, tab completion and respawning
+never wait for the database. Home names can be up to 32 characters long.
 
 ## Translations
 

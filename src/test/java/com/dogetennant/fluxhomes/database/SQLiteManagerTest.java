@@ -5,6 +5,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Path;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -15,18 +20,28 @@ class SQLiteManagerTest extends DatabaseManagerContractTest {
     Path dataFolder;
 
     @Override
-    protected DatabaseManager open() {
-        SQLiteManager manager = new SQLiteManager(TestPlugin.mockPlugin(dataFolder, dataFolder));
+    protected DatabaseManager open(String prefix) throws Exception {
+        SQLiteManager manager = new SQLiteManager(TestPlugin.mockPlugin(dataFolder, dataFolder, prefix));
         manager.initialize();
         return manager;
     }
 
+    @Override
+    protected List<String> tables(DatabaseManager manager) throws Exception {
+        List<String> names = new ArrayList<>();
+        try (Connection con = manager.dataSource.getConnection();
+             ResultSet rs = con.getMetaData().getTables(null, null, "%", new String[] {"TABLE"})) {
+            while (rs.next()) names.add(rs.getString("TABLE_NAME"));
+        }
+        return names;
+    }
+
     @Test
-    void homesSurviveARestart() {
+    void homesSurviveARestart() throws Exception {
         db.saveHome(home(ALEX, "base", "world", 7));
         db.shutdown();
 
-        DatabaseManager reopened = open();
+        DatabaseManager reopened = open("");
         try {
             assertSameHome(reopened.getHome(ALEX, "base"), home(ALEX, "base", "world", 7));
         } finally {
@@ -40,11 +55,27 @@ class SQLiteManagerTest extends DatabaseManagerContractTest {
     }
 
     @Test
-    void longHomeNamesAreKept() {
-        String name = "a".repeat(40);
+    void theJournalIsInWalMode() throws Exception {
+        try (Connection con = db.dataSource.getConnection();
+             Statement stmt = con.createStatement();
+             ResultSet rs = stmt.executeQuery("PRAGMA journal_mode;")) {
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString(1)).isEqualToIgnoringCase("wal");
+        }
+    }
 
-        db.saveHome(home(ALEX, name, "world", 1));
+    @Test
+    void anExistingTableFromVersion1IsUsedAsItIs() throws Exception {
+        // 1.0.x created exactly this table; 1.1 with the default prefix must keep using it
+        db.saveHome(home(ALEX, "base", "world", 3));
+        db.shutdown();
 
-        assertThat(db.getHome(ALEX, name)).isNotNull();
+        DatabaseManager upgraded = open("");
+        try {
+            assertThat(tables(upgraded)).containsOnlyOnce("homes");
+            assertThat(upgraded.getHome(ALEX, "base")).isNotNull();
+        } finally {
+            upgraded.shutdown();
+        }
     }
 }

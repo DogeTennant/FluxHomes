@@ -20,11 +20,15 @@ abstract class DatabaseManagerContractTest {
 
     protected DatabaseManager db;
 
-    protected abstract DatabaseManager open() throws Exception;
+    /** Opens a ready-to-use manager whose table is {@code <prefix>homes}. */
+    protected abstract DatabaseManager open(String prefix) throws Exception;
+
+    /** Names of the tables that exist. */
+    protected abstract java.util.List<String> tables(DatabaseManager manager) throws Exception;
 
     @BeforeEach
     void openDatabase() throws Exception {
-        db = open();
+        db = open("");
     }
 
     @AfterEach
@@ -39,6 +43,24 @@ abstract class DatabaseManagerContractTest {
     /** Homes have no equals(); compare field by field. */
     protected static void assertSameHome(Home actual, Home expected) {
         assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
+    }
+
+    @Test
+    void withoutAPrefixTheTableIsCalledHomes() throws Exception {
+        assertThat(tables(db)).contains("homes");
+    }
+
+    @Test
+    void thePrefixGoesInFrontOfTheTableName() throws Exception {
+        DatabaseManager prefixed = open("fh_");
+        try {
+            prefixed.saveHome(home(ALEX, "base", "world", 1));
+
+            assertThat(tables(prefixed)).contains("fh_homes");
+            assertThat(prefixed.getHome(ALEX, "base")).isNotNull();
+        } finally {
+            prefixed.shutdown();
+        }
     }
 
     @Test
