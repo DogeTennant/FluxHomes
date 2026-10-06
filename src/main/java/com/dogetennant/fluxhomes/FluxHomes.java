@@ -80,7 +80,7 @@ public class FluxHomes extends JavaPlugin {
 
         boolean changed = false;
         for (String key : defaultConfig.getKeys(true)) {
-            if (!config.contains(key)) {
+            if (!config.isSet(key)) {
                 config.set(key, defaultConfig.get(key));
                 changed = true;
             }

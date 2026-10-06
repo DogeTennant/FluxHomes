@@ -28,6 +28,7 @@ warmup-cancelled: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>Teleportation canc
 cooldown: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>You must wait <white>{seconds}</white> seconds before teleporting again.</red>"
 
 admin-help-header: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Admin Commands:</green>"
+admin-help-tp: " <aqua>/homesadmin tp <white><player> [home] <gray>- Teleport to a player's home."
 admin-help-delhome: " <aqua>/homesadmin delhome <white><player> <home> <gray>- Delete a player's home."
 admin-help-listhomes: " <aqua>/homesadmin listhomes <white><player> <gray>- List a player's homes."
 admin-help-clearhomes: " <aqua>/homesadmin clearhomes <white><player> <gray>- Clear all of a player's homes."
@@ -35,6 +36,7 @@ admin-help-settings: " <aqua>/homesadmin settings <gray>- Open the settings GUI.
 admin-help-language: " <aqua>/homesadmin language <white>[name] <gray>- Change the active language."
 admin-help-reload: " <aqua>/homesadmin reload <gray>- Reload config and translations."
 
+admin-tp-success: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Teleported to <white>{player}</white>'s home <white>{home}</white>.</green>"
 admin-home-deleted: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Deleted home <white>{home}</white> for <white>{player}</white>.</green>"
 admin-home-list-header: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Homes for <white>{player}</white>:</green>"
 admin-no-homes: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red><white>{player}</white> has no homes.</red>"

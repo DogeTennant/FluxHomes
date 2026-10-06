@@ -6,7 +6,7 @@
 
   <groupId>com.fluxhomes</groupId>
   <artifactId>FluxHomes</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.4</version>
   <packaging>jar</packaging>
 
   <properties>

@@ -28,6 +28,7 @@ warmup-cancelled: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>Teleportace byla z
 cooldown: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>Musíš počkat <white>{seconds}</white> sekund před další teleportací.</red>"
 
 admin-help-header: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Adminské příkazy:</green>"
+admin-help-tp: " <aqua>/homesadmin tp <white><hráč> [domov] <gray>- Teleportuj se na domov hráče."
 admin-help-delhome: " <aqua>/homesadmin delhome <white><hráč> <domov> <gray>- Smaž domov hráče."
 admin-help-listhomes: " <aqua>/homesadmin listhomes <white><hráč> <gray>- Zobraz domovy hráče."
 admin-help-clearhomes: " <aqua>/homesadmin clearhomes <white><hráč> <gray>- Smaž všechny domovy hráče."
@@ -36,6 +37,7 @@ admin-help-language: " <aqua>/homesadmin language <white>[název] <gray>- Změň
 admin-help-reload: " <aqua>/homesadmin reload <gray>- Znovu načti konfiguraci a překlady."
 admin-help-import: " <aqua>/homesadmin import <white><zdroj> <gray>- Importuj domovy z jiného pluginu."
 
+admin-tp-success: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Teleportován na domov <white>{home}</white> hráče <white>{player}</white>.</green>"
 admin-home-deleted: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Domov <white>{home}</white> hráče <white>{player}</white> byl smazán.</green>"
 admin-home-list-header: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Domovy hráče <white>{player}</white>:</green>"
 admin-no-homes: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>Hráč <white>{player}</white> nemá žádné domovy.</red>"

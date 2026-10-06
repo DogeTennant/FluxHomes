@@ -1,7 +1,7 @@
 name: FluxHomes
 version: 1.0.0
 main: com.dogetennant.fluxhomes.FluxHomes
-api-version: '1.21'
+api-version: '26.1'
 author: DogeTennant
 description: A modern, feature-rich homes plugin.
 
@@ -20,8 +20,9 @@ commands:
     usage: /homes
   homesadmin:
     description: Admin home management commands.
-    usage: /homesadmin <delhome|listhomes|clearhomes|reload> [player] [home]
+    usage: /homesadmin <player|subcommand> [home]
     permission: fluxhomes.admin
+    aliases: [ha]
 
 permissions:
   fluxhomes.home:
