@@ -8,6 +8,7 @@ import com.dogetennant.fluxhomes.models.SetHomeResult;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +21,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -48,6 +51,8 @@ class HomeManagerTest {
     private SQLiteManager db;
     private HomeManager homes;
     private final Set<String> permissions = new HashSet<>();
+    /** Permissions set to false (negated), e.g. by a group that takes them away. */
+    private final Set<String> negated = new HashSet<>();
     private final Set<UUID> online = new HashSet<>();
 
     @BeforeEach
@@ -74,6 +79,10 @@ class HomeManagerTest {
         when(player.getWorld()).thenReturn(world);
         when(player.getLocation()).thenReturn(new Location(world, 10.5, 70, -3.25, 45f, 10f));
         when(player.hasPermission(anyString())).thenAnswer(call -> permissions.contains(call.getArgument(0, String.class)));
+        when(player.getEffectivePermissions()).thenAnswer(call -> Stream.concat(
+                permissions.stream().map(p -> new PermissionAttachmentInfo(player, p, null, true)),
+                negated.stream().map(p -> new PermissionAttachmentInfo(player, p, null, false)))
+                .collect(Collectors.toSet()));
         return player;
     }
 
@@ -165,6 +174,23 @@ class HomeManagerTest {
         permissions.add("fluxhomes.homes.12");
 
         assertThat(homes.getMaxHomes(alexIn("world"))).isEqualTo(12);
+    }
+
+    @Test
+    void aNumberAbove100CountsToo() {
+        permissions.add("fluxhomes.homes.150");
+        permissions.add("fluxhomes.homes.20");
+
+        assertThat(homes.getMaxHomes(alexIn("world"))).isEqualTo(150);
+    }
+
+    @Test
+    void aNegatedOrNonNumberPermissionDoesNotCount() {
+        permissions.add("fluxhomes.homes.4");
+        negated.add("fluxhomes.homes.50");
+        permissions.add("fluxhomes.homes.lots");
+
+        assertThat(homes.getMaxHomes(alexIn("world"))).isEqualTo(4);
     }
 
     /** Operators have every numbered permission; unlimited must still win (problem fluxhomes-op-limited-to-100-homes). */

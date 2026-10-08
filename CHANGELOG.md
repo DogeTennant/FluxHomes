@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.2.0 - 2026-10-08
+
+### Changed
+- Home names are shown exactly as typed. Before, MiniMessage tags and `&` colour codes in a name
+  were carried out: a player could hide a click action in a home name (for example one that runs
+  `/stop`), which ran as whoever clicked it in `/homes`, `/home` or `/ha list`. Names that used
+  colours now show the tags as text.
+- A `/home` during a running warmup replaces it: the countdown starts again for the new home.
+  Before, the first home won and the second `/home` was cancelled with "you moved".
+
+### Fixed
+- `fluxhomes.homes.<number>` above 100 now counts (e.g. `fluxhomes.homes.150`). Before, only 1 to
+  100 were checked, so such a player got `max-homes.default`. The limit is now read from the
+  player's permissions in one pass instead of up to 100 checks.
+- The cooldown message rounds up, so it never says "wait 0 seconds".
+- An expired `/delhome` timer no longer cancels a newer confirmation of the same home early.
+
 ## 1.1.0 - 2026-10-07
 
 ### Added

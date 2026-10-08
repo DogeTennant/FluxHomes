@@ -8,6 +8,8 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 import com.dogetennant.fluxhomes.models.SetHomeResult;
 import java.util.Map;
 import java.util.HashMap;
@@ -23,7 +25,10 @@ public class HomeCommand implements CommandExecutor, TabCompleter {
         this.plugin = plugin;
     }
 
-    private final Map<UUID, String> pendingDeletions = new HashMap<>();
+    /** A /delhome waiting for its confirmation, and the timer that ends the wait. */
+    private record PendingDeletion(String home, BukkitTask timeout) {}
+
+    private final Map<UUID, PendingDeletion> pendingDeletions = new HashMap<>();
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -117,30 +122,32 @@ public class HomeCommand implements CommandExecutor, TabCompleter {
             UUID uuid = player.getUniqueId();
 
             // If they already have a pending deletion for this home, confirm it
-            if (name.equals(pendingDeletions.get(uuid))) {
-                pendingDeletions.remove(uuid);
+            PendingDeletion pending = pendingDeletions.remove(uuid);
+            if (pending != null) pending.timeout().cancel();
+            if (pending != null && pending.home().equals(name)) {
                 plugin.getHomeManager().deleteHome(uuid, name, deleted -> { });
                 plugin.getMessageUtil().send(player, "home-deleted", "{home}", name);
                 return;
             }
 
             // Otherwise store it as pending and ask for confirmation
-            pendingDeletions.put(uuid, name);
             plugin.getMessageUtil().send(player, "home-delete-confirm", "{home}", name);
 
             // Auto-expire the confirmation after timeout
             int timeout = plugin.getConfigUtil().getConfirmDeletionTimeout();
-            new org.bukkit.scheduler.BukkitRunnable() {
+            BukkitRunnable expire = new BukkitRunnable() {
                 @Override
                 public void run() {
-                    if (name.equals(pendingDeletions.get(uuid))) {
+                    PendingDeletion current = pendingDeletions.get(uuid);
+                    if (current != null && current.timeout().getTaskId() == getTaskId()) {
                         pendingDeletions.remove(uuid);
                         if (player.isOnline()) {
                             plugin.getMessageUtil().send(player, "home-delete-cancelled");
                         }
                     }
                 }
-            }.runTaskLater(plugin, timeout * 20L);
+            };
+            pendingDeletions.put(uuid, new PendingDeletion(name, expire.runTaskLater(plugin, timeout * 20L)));
 
         } else {
             plugin.getHomeManager().deleteHome(player.getUniqueId(), name, success -> {

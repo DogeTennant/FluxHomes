@@ -11,6 +11,7 @@ import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
@@ -52,6 +53,8 @@ public class HomeManager {
     /** Longest home name; the MySQL column is {@code VARCHAR(32)}. */
     public static final int MAX_NAME_LENGTH = 32;
 
+    private static final String LIMIT_PERMISSION = "fluxhomes.homes.";
+
     private final FluxHomes plugin;
     private final DatabaseManager database;
     private final CooldownManager cooldownManager;
@@ -61,6 +64,9 @@ public class HomeManager {
 
     /** Homes of loaded players, name to home, in database order. */
     private final Map<UUID, Map<String, Home>> cache = new ConcurrentHashMap<>();
+
+    /** The running teleport warmup per player (main thread). */
+    private final Map<UUID, BukkitRunnable> warmups = new HashMap<>();
 
     /**
      * @param databaseThread runs database work, one task at a time in order
@@ -165,17 +171,31 @@ public class HomeManager {
     // Limits
     //
 
+    /**
+     * {@code fluxhomes.homes.unlimited}, else the highest {@code fluxhomes.homes.<n>} the player has,
+     * else {@code max-homes.default}.
+     */
     public int getMaxHomes(Player player) {
-        if (player.hasPermission("fluxhomes.homes.unlimited")) {
+        if (player.hasPermission(LIMIT_PERMISSION + "unlimited")) {
             return Integer.MAX_VALUE;
         }
-        // permission-based home limits, e.g. fluxhomes.homes.10
-        for (int i = 100; i >= 1; i--) {
-            if (player.hasPermission("fluxhomes.homes." + i)) {
-                return i;
+        int limit = homeLimit(player.getEffectivePermissions());
+        return limit > 0 ? limit : plugin.getConfigUtil().getMaxHomes("default");
+    }
+
+    /** The highest {@code fluxhomes.homes.<n>} set to true, or 0 without one. */
+    static int homeLimit(Iterable<PermissionAttachmentInfo> permissions) {
+        int highest = 0;
+        for (PermissionAttachmentInfo permission : permissions) {
+            String node = permission.getPermission();
+            if (!permission.getValue() || !node.startsWith(LIMIT_PERMISSION)) continue;
+            try {
+                highest = Math.max(highest, Integer.parseInt(node.substring(LIMIT_PERMISSION.length())));
+            } catch (NumberFormatException ignored) {
+                // fluxhomes.homes.unlimited or another word
             }
         }
-        return plugin.getConfigUtil().getMaxHomes("default");
+        return highest;
     }
 
     //
@@ -246,6 +266,7 @@ public class HomeManager {
     // Teleport
     //
 
+    /** Teleports after the warmup; a new call replaces the player's running warmup. */
     public void teleportHome(Player player, Home home) {
         UUID uuid = player.getUniqueId();
 
@@ -257,6 +278,9 @@ public class HomeManager {
             }
         }
 
+        BukkitRunnable running = warmups.remove(uuid);
+        if (running != null) running.cancel();
+
         if (plugin.getConfigUtil().isWarmupEnabled()) {
             int warmup = plugin.getConfigUtil().getWarmupSeconds();
             plugin.getMessageUtil().send(player, "warmup-start", "{seconds}", String.valueOf(warmup));
@@ -265,11 +289,11 @@ public class HomeManager {
             final int[] ticksElapsed = {0};
             final int totalTicks = warmup * 20;
 
-            new BukkitRunnable() {
+            BukkitRunnable warmupTask = new BukkitRunnable() {
                 @Override
                 public void run() {
                     if (!player.isOnline()) {
-                        cancel();
+                        finish();
                         return;
                     }
 
@@ -278,17 +302,24 @@ public class HomeManager {
                             current.getBlockY() != startLocation.getBlockY() ||
                             current.getBlockZ() != startLocation.getBlockZ()) {
                         plugin.getMessageUtil().send(player, "warmup-cancelled");
-                        cancel();
+                        finish();
                         return;
                     }
 
                     ticksElapsed[0]++;
                     if (ticksElapsed[0] >= totalTicks) {
+                        finish();
                         performTeleport(player, home);
-                        cancel();
                     }
                 }
-            }.runTaskTimer(plugin, 0L, 1L);
+
+                private void finish() {
+                    cancel();
+                    warmups.remove(uuid, this);
+                }
+            };
+            warmups.put(uuid, warmupTask);
+            warmupTask.runTaskTimer(plugin, 0L, 1L);
         } else {
             performTeleport(player, home);
         }

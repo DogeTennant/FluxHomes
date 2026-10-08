@@ -99,12 +99,16 @@ public class MessageUtil {
                 .toList();
     }
 
+    /**
+     * Sends a message from the language file. {@code replacements} are pairs of placeholder and
+     * value; values (home, player and world names) are shown exactly as given, never read as
+     * formatting, so a home name cannot carry colours, clicks or hovers.
+     */
     public void send(Player player, String key, String... replacements) {
-        String raw = langConfig.getString(key, "<red>Missing message: " + key + "</red>");
+        String raw = convertLegacy(langConfig.getString(key, "<red>Missing message: " + key + "</red>"));
         for (int i = 0; i + 1 < replacements.length; i += 2) {
-            raw = raw.replace(replacements[i], replacements[i + 1]);
+            raw = raw.replace(replacements[i], miniMessage.escapeTags(replacements[i + 1]));
         }
-        raw = convertLegacy(raw);
         Component message = miniMessage.deserialize(raw);
         player.sendMessage(message);
     }

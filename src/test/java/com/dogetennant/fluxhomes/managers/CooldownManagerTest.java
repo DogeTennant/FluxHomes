@@ -6,12 +6,13 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/** Teleport cooldowns. Uses whole minutes or zero, so the real clock cannot make it flaky. */
+/** Teleport cooldowns, on a clock the test moves. */
 class CooldownManagerTest {
 
     private static final UUID ALEX = UUID.fromString("00000000-0000-0000-0000-00000000a1e7");
 
-    private final CooldownManager cooldowns = new CooldownManager();
+    private long now = 1_000_000;
+    private final CooldownManager cooldowns = new CooldownManager(() -> now);
 
     @Test
     void nobodyIsOnCooldownAtFirst() {
@@ -21,10 +22,25 @@ class CooldownManagerTest {
 
     @Test
     void aCooldownLastsItsSeconds() {
-        cooldowns.setCooldown(ALEX, 60);
+        cooldowns.setCooldown(ALEX, 5);
 
+        now += 4_999;
         assertThat(cooldowns.isOnCooldown(ALEX)).isTrue();
-        assertThat(cooldowns.getRemainingSeconds(ALEX)).isBetween(58, 60);
+        now += 1;
+        assertThat(cooldowns.isOnCooldown(ALEX)).isFalse();
+    }
+
+    @Test
+    void theWaitIsShownInWholeSecondsRoundedUp() {
+        cooldowns.setCooldown(ALEX, 5);
+        assertThat(cooldowns.getRemainingSeconds(ALEX)).isEqualTo(5);
+
+        now += 10;                                       // 4.99 s left
+        assertThat(cooldowns.getRemainingSeconds(ALEX)).isEqualTo(5);
+
+        now += 4_000;                                    // 0.99 s left: still "wait 1 second", never 0
+        assertThat(cooldowns.isOnCooldown(ALEX)).isTrue();
+        assertThat(cooldowns.getRemainingSeconds(ALEX)).isEqualTo(1);
     }
 
     @Test
@@ -46,8 +62,9 @@ class CooldownManagerTest {
     @Test
     void cleanupDropsOnlyFinishedCooldowns() {
         UUID steve = UUID.randomUUID();
-        cooldowns.setCooldown(ALEX, 0);
+        cooldowns.setCooldown(ALEX, 1);
         cooldowns.setCooldown(steve, 60);
+        now += 1_000;
 
         cooldowns.cleanup();
 
