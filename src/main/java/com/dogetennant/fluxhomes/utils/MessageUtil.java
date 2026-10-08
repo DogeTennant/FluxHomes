@@ -107,10 +107,19 @@ public class MessageUtil {
     public void send(Player player, String key, String... replacements) {
         String raw = convertLegacy(langConfig.getString(key, "<red>Missing message: " + key + "</red>"));
         for (int i = 0; i + 1 < replacements.length; i += 2) {
-            raw = raw.replace(replacements[i], miniMessage.escapeTags(replacements[i + 1]));
+            raw = raw.replace(replacements[i], escape(replacements[i + 1]));
         }
         Component message = miniMessage.deserialize(raw);
         player.sendMessage(message);
+    }
+
+    /**
+     * Text that MiniMessage shows exactly as given: {@code \} and {@code <} are escaped
+     * ({@code MiniMessage#escapeTags} leaves backslashes, so a trailing one would escape the
+     * message's next tag).
+     */
+    static String escape(String text) {
+        return text.replace("\\", "\\\\").replace("<", "\\<");
     }
 
     private String convertLegacy(String input) {

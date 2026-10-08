@@ -79,6 +79,19 @@ class MessageUtilTest {
     }
 
     @Test
+    void backslashesInANameAreShownToo() {
+        // a trailing backslash must not swallow the message's own closing tag
+        assertThat(plain(sent(new MessageUtil(plugin), "home-set", "{home}", "base\\")))
+                .isEqualTo("[FluxHomes] Home base\\ has been set.");
+    }
+
+    @Test
+    void anEscapedTagInANameIsShownWithItsBackslash() {
+        assertThat(plain(sent(new MessageUtil(plugin), "home-list-entry", "{home}", "\\<red>x")))
+                .isEqualTo(" - \\<red>x");
+    }
+
+    @Test
     void legacyColourCodesInTheLanguageFileStillWork() throws Exception {
         Path translations = Files.createDirectories(dataFolder.resolve("translations"));
         Files.writeString(translations.resolve("en_us.yml"), "home-set: \"&aHome {home} is set\"\n");

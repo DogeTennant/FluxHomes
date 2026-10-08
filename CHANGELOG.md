@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.1 - 2026-10-08
+
+### Fixed
+- Backslashes in home names are shown too. Before, a name ending in `\` showed the message's own
+  formatting as text ("Home base</white> has been set.").
+
 ## 1.2.0 - 2026-10-08
 
 ### Changed
