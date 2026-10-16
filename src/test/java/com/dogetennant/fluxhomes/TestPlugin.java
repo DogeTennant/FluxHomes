@@ -70,13 +70,16 @@ public final class TestPlugin {
     }
 
     /**
-     * The mocked Bukkit server behind {@code Bukkit.getWorld(...)} and friends, installed once per
-     * test JVM. Stub what a test needs (e.g. {@code getWorld(UUID)}).
+     * The mocked Bukkit server behind {@code Bukkit.getWorld(...)} and friends, made once per
+     * test JVM and installed again after a MockBukkit test replaced it. Stub what a test needs
+     * (e.g. {@code getWorld(UUID)}).
      */
     public static synchronized Server bukkitServer() {
         if (server == null) {
             server = mock(Server.class);
             when(server.getLogger()).thenReturn(Logger.getLogger("server-test"));
+        }
+        if (Bukkit.getServer() != server) {
             // Bukkit.setServer() would ask Paper for server build info, which only a real server has
             try {
                 Field field = Bukkit.class.getDeclaredField("server");

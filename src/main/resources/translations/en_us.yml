@@ -46,6 +46,9 @@ admin-language-list: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Available lan
 admin-language-changed: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Language changed to <white>{language}</white>.</green>"
 admin-language-not-found: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>Language <white>{language}</white> not found in the translations folder.</red>"
 admin-reloaded: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Configuration and translations reloaded.</green>"
+# {file} = a file with a YAML error; it is never saved over
+admin-reload-file-broken: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red><white>{file}</white> has a mistake (YAML error) - what was read from it before stays in use. Fix it, then <white>/homesadmin reload</white> again.</red>"
+config-file-broken: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red><white>config.yml</white> has a mistake (YAML error), so nothing was changed. Fix it, then <white>/homesadmin reload</white>.</red>"
 admin-import-started: "<gray>[<aqua>FluxHomes</aqua>]</gray> <yellow>Starting EssentialsX import, please wait..."
 admin-import-complete: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Import complete! Imported <white>{count}</white> homes."
 admin-import-not-found: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>EssentialsX userdata folder not found. Is EssentialsX installed?"

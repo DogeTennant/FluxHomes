@@ -1,6 +1,11 @@
 package com.dogetennant.fluxhomes.utils;
 
 import com.dogetennant.fluxhomes.FluxHomes;
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.YamlConfiguration;
+
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 public class ConfigUtil {
@@ -9,6 +14,42 @@ public class ConfigUtil {
 
     public ConfigUtil(FluxHomes plugin) {
         this.plugin = plugin;
+    }
+
+    /**
+     * config.yml as it is on disk now, or null when it has a YAML error (logged). Bukkit itself
+     * reads such a file as empty - the built-in settings, and an empty file once saved.
+     */
+    public YamlConfiguration readFile() {
+        YamlConfiguration file = new YamlConfiguration();
+        try {
+            file.load(new File(plugin.getDataFolder(), "config.yml"));
+            return file;
+        } catch (IOException | InvalidConfigurationException e) {
+            plugin.getLogger().severe("config.yml cannot be read, so it is left as it is: " + e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Changes one option, in the settings in use and in config.yml on disk. Everything else in the
+     * file stays as it is there, also hand edits not reloaded yet. A file with a YAML error is left
+     * alone: saving the settings in use over it would throw away whatever the admin wrote in it.
+     *
+     * @return false when config.yml has an error (nothing changed)
+     */
+    public boolean set(String path, Object value) {
+        YamlConfiguration file = readFile();
+        if (file == null) return false;
+        file.set(path, value);
+        try {
+            file.save(new File(plugin.getDataFolder(), "config.yml"));
+        } catch (IOException e) {
+            plugin.getLogger().severe("Could not save config.yml: " + e.getMessage());
+            return false;
+        }
+        plugin.getConfig().set(path, value);
+        return true;
     }
 
     public String getStorageType() {

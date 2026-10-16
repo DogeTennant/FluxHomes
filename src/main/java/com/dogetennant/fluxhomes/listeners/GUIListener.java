@@ -41,16 +41,16 @@ public class GUIListener implements Listener {
         int slot = event.getSlot();
 
         switch (slot) {
-            case 40 -> handleMaxHomes(left);
-            case 11 -> handleToggle("cooldown.enabled");
-            case 12 -> handleInt("cooldown.seconds", left, 1, 1, 3600);
-            case 15 -> handleToggle("warmup.enabled");
-            case 16 -> handleInt("warmup.seconds", left, 1, 1, 300);
-            case 20 -> handleToggle("teleport-sound.enabled");
-            case 22 -> handleToggle("respawn-at-home.enabled");
-            case 24 -> handleToggle("confirm-deletion.enabled");
-            case 25 -> handleInt("confirm-deletion.timeout", left, 5, 5, 300);
-            case 29 -> handleToggle("blocked-worlds.enabled");
+            case 40 -> handleMaxHomes(player, left);
+            case 11 -> handleToggle(player, "cooldown.enabled");
+            case 12 -> handleInt(player, "cooldown.seconds", left, 1, 1, 3600);
+            case 15 -> handleToggle(player, "warmup.enabled");
+            case 16 -> handleInt(player, "warmup.seconds", left, 1, 1, 300);
+            case 20 -> handleToggle(player, "teleport-sound.enabled");
+            case 22 -> handleToggle(player, "respawn-at-home.enabled");
+            case 24 -> handleToggle(player, "confirm-deletion.enabled");
+            case 25 -> handleInt(player, "confirm-deletion.timeout", left, 5, 5, 300);
+            case 29 -> handleToggle(player, "blocked-worlds.enabled");
             case 30 -> {
                 player.closeInventory();
                 String mode = left ? "add" : "remove";
@@ -100,18 +100,18 @@ public class GUIListener implements Listener {
                     plugin.getMessageUtil().send(player, "gui-blocked-worlds-already-added", "{world}", input);
                 } else {
                     worlds.add(input);
-                    plugin.getConfig().set("blocked-worlds.worlds", worlds);
-                    plugin.saveConfig();
-                    plugin.getMessageUtil().send(player, "gui-blocked-worlds-added", "{world}", input);
+                    if (set(player, "blocked-worlds.worlds", worlds)) {
+                        plugin.getMessageUtil().send(player, "gui-blocked-worlds-added", "{world}", input);
+                    }
                 }
             } else {
                 if (!worlds.contains(input)) {
                     plugin.getMessageUtil().send(player, "gui-blocked-worlds-not-found", "{world}", input);
                 } else {
                     worlds.remove(input);
-                    plugin.getConfig().set("blocked-worlds.worlds", worlds);
-                    plugin.saveConfig();
-                    plugin.getMessageUtil().send(player, "gui-blocked-worlds-removed", "{world}", input);
+                    if (set(player, "blocked-worlds.worlds", worlds)) {
+                        plugin.getMessageUtil().send(player, "gui-blocked-worlds-removed", "{world}", input);
+                    }
                 }
             }
 
@@ -120,24 +120,31 @@ public class GUIListener implements Listener {
         });
     }
 
-    private void handleMaxHomes(boolean increase) {
+    /**
+     * Changes one option in config.yml (the rest of the file stays as it is on disk). A file with a
+     * YAML error is left alone and the admin is told.
+     */
+    private boolean set(Player player, String configKey, Object value) {
+        if (plugin.getConfigUtil().set(configKey, value)) return true;
+        plugin.getMessageUtil().send(player, "config-file-broken");
+        return false;
+    }
+
+    private void handleMaxHomes(Player player, boolean increase) {
         int current = plugin.getConfigUtil().getMaxHomes("default");
         int newValue = increase ? current + 1 : Math.max(1, current - 1);
-        plugin.getConfig().set("max-homes.default", newValue);
-        plugin.saveConfig();
+        set(player, "max-homes.default", newValue);
     }
 
-    private void handleToggle(String configKey) {
+    private void handleToggle(Player player, String configKey) {
         boolean current = plugin.getConfig().getBoolean(configKey);
-        plugin.getConfig().set(configKey, !current);
-        plugin.saveConfig();
+        set(player, configKey, !current);
     }
 
-    private void handleInt(String configKey, boolean increase, int step, int min, int max) {
+    private void handleInt(Player player, String configKey, boolean increase, int step, int min, int max) {
         int current = plugin.getConfig().getInt(configKey);
         int newValue = increase ? Math.min(max, current + step) : Math.max(min, current - step);
-        plugin.getConfig().set(configKey, newValue);
-        plugin.saveConfig();
+        set(player, configKey, newValue);
     }
 
     private void handleLanguage(Player player, boolean next) {
@@ -152,8 +159,6 @@ public class GUIListener implements Listener {
                 : (index - 1 + languages.size()) % languages.size();
 
         String newLang = languages.get(index);
-        plugin.getConfig().set("language", newLang);
-        plugin.saveConfig();
-        plugin.getMessageUtil().loadLang();
+        if (set(player, "language", newLang)) plugin.getMessageUtil().loadLang();
     }
 }

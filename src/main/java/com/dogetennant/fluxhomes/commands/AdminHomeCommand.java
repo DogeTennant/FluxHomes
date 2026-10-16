@@ -187,13 +187,21 @@ public class AdminHomeCommand implements CommandExecutor, TabCompleter {
     }
 
     private void handleAdminReload(CommandSender sender) {
-        plugin.reloadConfig();
-        plugin.getMessageUtil().loadLang();
+        // a file with a YAML error is left alone, and what was read from it before stays in use
+        boolean configRead = plugin.getConfigUtil().readFile() != null;
+        if (configRead) plugin.reloadConfig();
+        boolean languageRead = plugin.getMessageUtil().loadLang();
 
+        List<String> broken = new java.util.ArrayList<>();
+        if (!configRead) broken.add("config.yml");
+        if (!languageRead) broken.add(plugin.getMessageUtil().getLangFileName());
         if (sender instanceof Player player) {
-            plugin.getMessageUtil().send(player, "admin-reloaded");
+            if (broken.isEmpty()) plugin.getMessageUtil().send(player, "admin-reloaded");
+            broken.forEach(file -> plugin.getMessageUtil().send(player, "admin-reload-file-broken", "{file}", file));
         } else {
-            sender.sendMessage("FluxHomes configuration reloaded.");
+            if (broken.isEmpty()) sender.sendMessage("FluxHomes configuration reloaded.");
+            broken.forEach(file -> sender.sendMessage(file + " has a mistake (YAML error) - what was read from it"
+                    + " before stays in use. Fix it, then /homesadmin reload again."));
         }
     }
 
@@ -316,8 +324,15 @@ public class AdminHomeCommand implements CommandExecutor, TabCompleter {
             return;
         }
 
-        plugin.getConfig().set("language", newLang);
-        plugin.saveConfig();
+        if (!plugin.getConfigUtil().set("language", newLang)) {
+            if (sender instanceof Player player) {
+                plugin.getMessageUtil().send(player, "config-file-broken");
+            } else {
+                sender.sendMessage("config.yml has a mistake (YAML error), so nothing was changed."
+                        + " Fix it, then /homesadmin reload.");
+            }
+            return;
+        }
         plugin.getMessageUtil().loadLang();
 
         if (sender instanceof Player player) {

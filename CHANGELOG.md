@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.2.2 - 2026-10-16
+
+### Fixed
+- A YAML error in `config.yml` (one missing bracket or quote) keeps FluxHomes off at start, with a
+  console message. Before, the whole file was replaced by the built-in one - the MySQL login and
+  table prefix included - and FluxHomes ran on SQLite, so every home looked gone.
+- A YAML error in a translation no longer gets the file replaced by the English texts; it is left
+  alone, and the texts from before (at a start the built-in ones) are used until it is fixed.
+- `/homesadmin reload` with such an error keeps what was read before and says which file has it.
+- The settings menu and `/homesadmin language` change only their own option in `config.yml`. Before,
+  they saved the whole config in use: hand edits not reloaded yet were lost, and after a YAML error
+  the file was overwritten. While the file has an error they now change nothing and say so.
+
 ## 1.2.1 - 2026-10-08
 
 ### Fixed

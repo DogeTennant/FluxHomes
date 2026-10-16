@@ -47,6 +47,9 @@ admin-language-list: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Dostupné jaz
 admin-language-changed: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Jazyk byl změněn na <white>{language}</white>.</green>"
 admin-language-not-found: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>Jazyk <white>{language}</white> nebyl nalezen ve složce překlady.</red>"
 admin-reloaded: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Konfigurace a překlady byly znovu načteny.</green>"
+# {file} = soubor s chybou YAML; nikdy se nepřepíše
+admin-reload-file-broken: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red><white>{file}</white> obsahuje chybu (chyba YAML) - dál platí to, co se z něj načetlo dřív. Oprav ji a pak znovu dej <white>/homesadmin reload</white>.</red>"
+config-file-broken: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red><white>config.yml</white> obsahuje chybu (chyba YAML), takže se nic nezměnilo. Oprav ji a pak dej <white>/homesadmin reload</white>.</red>"
 admin-import-started: "<gray>[<aqua>FluxHomes</aqua>]</gray> <yellow>Spouštím import z EssentialsX, prosím čekej..."
 admin-import-complete: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Import dokončen! Importováno <white>{count}</white> domovů.</green>"
 admin-import-not-found: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>Složka EssentialsX userdata nebyla nalezena. Je EssentialsX nainstalován?"

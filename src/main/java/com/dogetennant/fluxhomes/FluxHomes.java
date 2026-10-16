@@ -32,12 +32,26 @@ public class FluxHomes extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        // A run stopped before (the same instance enabled again) left its parts behind; onDisable
+        // must only shut down what this run starts - it also runs when this run stays off.
+        databaseThread = null;
+        database = null;
+
         // Save default config
         saveDefaultConfig();
+        configUtil = new ConfigUtil(this);
+        // A config.yml with a YAML error reads as empty: filling in the "missing" options would save
+        // the built-in ones over it, and FluxHomes would run on another database (SQLite, no prefix)
+        if (configUtil.readFile() == null) {
+            getLogger().severe("config.yml has a mistake (YAML error, see above), so FluxHomes stays off"
+                    + " instead of running on the built-in settings. Fix it and restart the server.");
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
+        reloadConfig();
         updateConfig();
 
         // Initialize utilities
-        configUtil = new ConfigUtil(this);
         messageUtil = new MessageUtil(this);
 
         // Initialize database

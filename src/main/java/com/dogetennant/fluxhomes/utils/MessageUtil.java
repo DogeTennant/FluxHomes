@@ -2,6 +2,7 @@ package com.dogetennant.fluxhomes.utils;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -19,6 +20,7 @@ public class MessageUtil {
 
     private final FluxHomes plugin;
     private FileConfiguration langConfig;
+    private String langFileName;
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
 
     private static final String[] BUNDLED_LANGUAGES = {"en_us", "cs_cz"}; // Add new languages here
@@ -28,7 +30,14 @@ public class MessageUtil {
         loadLang();
     }
 
-    public void loadLang() {
+    /**
+     * Reads the language set in config.yml. A translation with a YAML error is left as it is (Bukkit
+     * would read it as empty and the missing texts would be saved over it): the texts from before
+     * stay, or the bundled ones at start.
+     *
+     * @return false when the translation file has an error
+     */
+    public boolean loadLang() {
         String language = plugin.getConfig().getString("language", "en_us");
         File translationsFolder = new File(plugin.getDataFolder(), "translations");
 
@@ -51,7 +60,16 @@ public class MessageUtil {
             langFile = new File(translationsFolder, "en_us.yml");
         }
 
-        langConfig = YamlConfiguration.loadConfiguration(langFile);
+        langFileName = "translations/" + langFile.getName();
+        YamlConfiguration read = new YamlConfiguration();
+        try {
+            read.load(langFile);
+        } catch (IOException | InvalidConfigurationException e) {
+            plugin.getLogger().severe(langFileName + " cannot be read, so it is left as it is: " + e.getMessage());
+            if (langConfig == null) langConfig = bundled(langFile.getName());
+            return false;
+        }
+        langConfig = read;
 
         // Add missing keys from default without overwriting
         InputStream defaultStream = plugin.getResource("translations/en_us.yml");
@@ -74,6 +92,20 @@ public class MessageUtil {
                 }
             }
         }
+        return true;
+    }
+
+    /** The translation file read last, e.g. {@code translations/cs_cz.yml}. */
+    public String getLangFileName() {
+        return langFileName;
+    }
+
+    /** The texts bundled in the jar for {@code fileName} (English when there are none). */
+    private YamlConfiguration bundled(String fileName) {
+        InputStream in = plugin.getResource("translations/" + fileName);
+        if (in == null) in = plugin.getResource("translations/en_us.yml");
+        if (in == null) return new YamlConfiguration();
+        return YamlConfiguration.loadConfiguration(new java.io.InputStreamReader(in, java.nio.charset.StandardCharsets.UTF_8));
     }
 
     private void copyDefaultLang(File destination, String language) {
