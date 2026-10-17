@@ -7,6 +7,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -18,8 +19,24 @@ public class SettingsGUI {
     private static final MiniMessage MM = MiniMessage.miniMessage();
     public static final String TITLE = "FluxHomes Settings";
 
+    /**
+     * Marks the menu's inventory. The menu is recognised by this, never by its title: a chest
+     * renamed in an anvil opens a screen with that name as its title.
+     */
+    public static final class Holder implements InventoryHolder {
+
+        private Inventory inventory;
+
+        @Override
+        public Inventory getInventory() {
+            return inventory;
+        }
+    }
+
     public static void open(Player player, FluxHomes plugin) {
-        Inventory inv = Bukkit.createInventory(null, 54, MM.deserialize("<dark_gray>" + TITLE));
+        Holder holder = new Holder();
+        Inventory inv = Bukkit.createInventory(holder, 54, MM.deserialize("<dark_gray>" + TITLE));
+        holder.inventory = inv;
 
         // Fill borders
         ItemStack border = buildItem(Material.GRAY_STAINED_GLASS_PANE, "<gray>", List.of());

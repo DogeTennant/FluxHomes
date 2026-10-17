@@ -31,6 +31,8 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onPlayerRespawn(PlayerRespawnEvent event) {
         if (!plugin.getConfigUtil().isRespawnAtHomeEnabled()) return;
+        // the server also "respawns" a player leaving the End through the exit portal
+        if (event.getRespawnReason() != PlayerRespawnEvent.RespawnReason.DEATH) return;
 
         // the respawn location is needed right now: only the homes loaded at login are used
         plugin.getHomeManager().cachedHome(event.getPlayer().getUniqueId(), "home").ifPresent(home -> {

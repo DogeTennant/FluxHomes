@@ -162,8 +162,7 @@ public class AdminHomeCommand implements CommandExecutor, TabCompleter {
                 return;
             }
 
-            player.teleport(loc);
-            plugin.getMessageUtil().send(player, "admin-tp-success",
+            plugin.getMessageUtil().send(player, player.teleport(loc) ? "admin-tp-success" : "admin-tp-stopped",
                     "{home}", homeName, "{player}", targetName);
         }));
     }
@@ -195,13 +194,18 @@ public class AdminHomeCommand implements CommandExecutor, TabCompleter {
         List<String> broken = new java.util.ArrayList<>();
         if (!configRead) broken.add("config.yml");
         if (!languageRead) broken.add(plugin.getMessageUtil().getLangFileName());
+        // the database is opened once, at start
+        boolean storageChanged = configRead && plugin.storageSettingsChanged();
         if (sender instanceof Player player) {
             if (broken.isEmpty()) plugin.getMessageUtil().send(player, "admin-reloaded");
             broken.forEach(file -> plugin.getMessageUtil().send(player, "admin-reload-file-broken", "{file}", file));
+            if (storageChanged) plugin.getMessageUtil().send(player, "admin-reload-storage-restart");
         } else {
             if (broken.isEmpty()) sender.sendMessage("FluxHomes configuration reloaded.");
             broken.forEach(file -> sender.sendMessage(file + " has a mistake (YAML error) - what was read from it"
                     + " before stays in use. Fix it, then /homesadmin reload again."));
+            if (storageChanged) sender.sendMessage("The storage settings (storage-type, table-prefix, mysql) changed."
+                    + " FluxHomes keeps using the old storage until the server restarts.");
         }
     }
 

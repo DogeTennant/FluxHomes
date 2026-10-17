@@ -23,6 +23,8 @@ home-list-empty: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>You have no homes s
 
 teleport-success: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Teleported to <white>{home}</white>.</green>"
 world-not-found: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>The world this home is in no longer exists.</red>"
+# another plugin stopped the teleport (e.g. in combat); no cooldown starts
+teleport-stopped: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>The teleport to <white>{home}</white> was stopped.</red>"
 
 warmup-start: "<gray>[<aqua>FluxHomes</aqua>]</gray> <yellow>Teleporting in <white>{seconds}</white> seconds, don't move.</yellow>"
 warmup-cancelled: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>Teleportation cancelled because you moved.</red>"
@@ -38,6 +40,7 @@ admin-help-language: " <aqua>/homesadmin language <white>[name] <gray>- Change t
 admin-help-reload: " <aqua>/homesadmin reload <gray>- Reload config and translations."
 
 admin-tp-success: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Teleported to <white>{player}</white>'s home <white>{home}</white>.</green>"
+admin-tp-stopped: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>The teleport to <white>{player}</white>'s home <white>{home}</white> was stopped.</red>"
 admin-home-deleted: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Deleted home <white>{home}</white> for <white>{player}</white>.</green>"
 admin-home-list-header: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Homes for <white>{player}</white>:</green>"
 admin-no-homes: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red><white>{player}</white> has no homes.</red>"
@@ -48,6 +51,7 @@ admin-language-not-found: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red>Language <
 admin-reloaded: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Configuration and translations reloaded.</green>"
 # {file} = a file with a YAML error; it is never saved over
 admin-reload-file-broken: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red><white>{file}</white> has a mistake (YAML error) - what was read from it before stays in use. Fix it, then <white>/homesadmin reload</white> again.</red>"
+admin-reload-storage-restart: "<gray>[<aqua>FluxHomes</aqua>]</gray> <yellow>The storage settings (<white>storage-type</white>, <white>table-prefix</white>, <white>mysql</white>) changed. FluxHomes keeps using the old storage until the server restarts.</yellow>"
 config-file-broken: "<gray>[<aqua>FluxHomes</aqua>]</gray> <red><white>config.yml</white> has a mistake (YAML error), so nothing was changed. Fix it, then <white>/homesadmin reload</white>.</red>"
 admin-import-started: "<gray>[<aqua>FluxHomes</aqua>]</gray> <yellow>Starting EssentialsX import, please wait..."
 admin-import-complete: "<gray>[<aqua>FluxHomes</aqua>]</gray> <green>Import complete! Imported <white>{count}</white> homes."

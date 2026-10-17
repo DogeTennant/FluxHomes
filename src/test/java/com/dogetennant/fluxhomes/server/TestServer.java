@@ -4,13 +4,17 @@ import com.dogetennant.fluxhomes.FluxHomes;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 import org.mockbukkit.mockbukkit.MockBukkit;
 import org.mockbukkit.mockbukkit.ServerMock;
 import org.mockbukkit.mockbukkit.entity.PlayerMock;
+import org.mockbukkit.mockbukkit.inventory.PlayerInventoryViewMock;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -18,6 +22,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The whole plugin on a MockBukkit server: its own config, translations and SQLite database in a
@@ -68,6 +74,39 @@ final class TestServer {
         return admin;
     }
 
+    /** A player without op who joins now (their homes are loaded while they log in). */
+    PlayerMock player(String name) {
+        return server.addPlayer(name);
+    }
+
+    /**
+     * Lets the database thread finish what is queued so far, then hands its answers to the main
+     * thread - a few rounds, for work handed back and forth (a marker queued behind it; no sleeps).
+     */
+    void settle() {
+        for (int round = 0; round < 3; round++) {
+            CountDownLatch marker = new CountDownLatch(1);
+            plugin.getHomeManager().inBackground(() -> {
+                marker.countDown();
+                return null;
+            }, done -> { });
+            try {
+                if (!marker.await(30, TimeUnit.SECONDS)) {
+                    throw new IllegalStateException("the database thread is stuck");
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new IllegalStateException(e);
+            }
+            server.getScheduler().performOneTick();
+        }
+    }
+
+    /** The default warmup (3 seconds) and one tick more. */
+    void waitOutTheWarmup() {
+        server.getScheduler().performTicks(3 * 20 + 1);
+    }
+
     Path file(String name) {
         return plugin.getDataFolder().toPath().resolve(name);
     }
@@ -84,11 +123,33 @@ final class TestServer {
         Files.writeString(file(name), text.replace(from, to));
     }
 
-    /** A left click on {@code slot} of the screen the player has open, as the server reports it. */
-    void click(PlayerMock player, int slot) {
-        InventoryClickEvent click = new InventoryClickEvent(player.getOpenInventory(),
+    /**
+     * A left click on raw slot {@code slot} of the screen the player has open, as the server reports
+     * it: the screen's slots first, then the player's 27 storage slots, then the hotbar.
+     */
+    InventoryClickEvent click(PlayerMock player, int slot) {
+        InventoryClickEvent click = new InventoryClickEvent(
+                new ClickableView(player, player.getOpenInventory().getTopInventory()),
                 InventoryType.SlotType.CONTAINER, slot, ClickType.LEFT, InventoryAction.PICKUP_ALL);
         server.getPluginManager().callEvent(click);
+        return click;
+    }
+
+    /**
+     * The player's view of a screen. MockBukkit 4.116 reads the item of a slot below the screen
+     * from the wrong inventory (a click there sees an empty slot); the server reads the player's.
+     */
+    private static final class ClickableView extends PlayerInventoryViewMock {
+
+        ClickableView(HumanEntity player, Inventory top) {
+            super(player, top);
+        }
+
+        @Override
+        public ItemStack getItem(int rawSlot) {
+            Inventory inventory = getInventory(rawSlot);
+            return inventory == null ? null : inventory.getItem(convertSlot(rawSlot));
+        }
     }
 
     /** What the player was told since the last call, as plain text. */

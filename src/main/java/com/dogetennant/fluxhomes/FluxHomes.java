@@ -15,6 +15,7 @@ import com.dogetennant.fluxhomes.commands.AdminHomeCommand;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import java.io.InputStream;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -29,6 +30,8 @@ public class FluxHomes extends JavaPlugin {
     private HomeManager homeManager;
     /** All database work, one task at a time and in order. */
     private ExecutorService databaseThread;
+    /** The storage settings the database was opened with (a reload does not reopen it). */
+    private List<Object> storageInUse;
 
     @Override
     public void onEnable() {
@@ -55,6 +58,7 @@ public class FluxHomes extends JavaPlugin {
         messageUtil = new MessageUtil(this);
 
         // Initialize database
+        storageInUse = configUtil.getStorageSettings();
         if (configUtil.getStorageType().equals("mysql")) {
             database = new MySQLManager(this);
         } else {
@@ -148,6 +152,11 @@ public class FluxHomes extends JavaPlugin {
             database.shutdown();
         }
         getLogger().info("FluxHomes has been disabled!");
+    }
+
+    /** Whether config.yml now names other storage than the one in use (it changes at a restart). */
+    public boolean storageSettingsChanged() {
+        return !configUtil.getStorageSettings().equals(storageInUse);
     }
 
     public ConfigUtil getConfigUtil() { return configUtil; }

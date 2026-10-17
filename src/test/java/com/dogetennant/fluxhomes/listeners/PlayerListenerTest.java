@@ -50,6 +50,7 @@ class PlayerListenerTest {
         Player alex = mock(Player.class);
         when(alex.getUniqueId()).thenReturn(ALEX);
         when(respawn.getPlayer()).thenReturn(alex);
+        when(respawn.getRespawnReason()).thenReturn(PlayerRespawnEvent.RespawnReason.DEATH);
         when(homes.cachedHome(any(), any())).thenReturn(Optional.empty());
         listener = new PlayerListener(plugin);
     }

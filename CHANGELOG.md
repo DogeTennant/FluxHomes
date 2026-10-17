@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.2.3 - 2026-10-17
+
+### Fixed
+- The settings menu can no longer be used from a chest named "FluxHomes Settings". Before, any
+  player could rename a chest in an anvil and change every setting by clicking items in it - the
+  home limit for everyone, the cooldown, the warmup, blocked worlds. The menu is now recognised by
+  its own marker, and every click needs `fluxhomes.admin`.
+- A click on an item in your own inventory below the settings menu no longer changes a setting.
+- A teleport another plugin stops (combat, regions) now says "The teleport to base was stopped."
+  with no cooldown. Before, it said "Teleported to base." and the cooldown started.
+- The blocked-worlds chat prompt ends when the admin leaves. Before, their next chat message, even
+  after rejoining, was hidden and added as a blocked world.
+- `respawn-at-home` only applies after a death. Before, leaving the End through the exit portal
+  also took players to their home.
+
+### Changed
+- `/homesadmin reload` says when the storage settings (`storage-type`, `table-prefix`, `mysql`)
+  changed: they take effect after a restart.
+
 ## 1.2.2 - 2026-10-16
 
 ### Fixed

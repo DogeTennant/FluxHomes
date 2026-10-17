@@ -6,6 +6,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 public class ConfigUtil {
@@ -58,6 +59,16 @@ public class ConfigUtil {
 
     public String getTablePrefix() {
         return plugin.getConfig().getString("table-prefix", "");
+    }
+
+    /** What the database is opened with at start: storage-type, table-prefix and the mysql section. */
+    public List<Object> getStorageSettings() {
+        return Arrays.asList(getStorageType(), getTablePrefix(),
+                plugin.getConfig().getString("mysql.host", "localhost"),
+                plugin.getConfig().getInt("mysql.port", 3306),
+                plugin.getConfig().getString("mysql.database", "minecraft"),
+                plugin.getConfig().getString("mysql.username", "root"),
+                plugin.getConfig().getString("mysql.password", ""));
     }
 
     public int getMaxHomes(String permissionGroup) {

@@ -10,17 +10,19 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class GUIListener implements Listener {
 
     private final FluxHomes plugin;
-    private final Map<UUID, String> pendingChatInput = new HashMap<>(); // "add" or "remove"
+    /** Admins asked to type a world name: "add" or "remove". Read on the chat thread. */
+    private final Map<UUID, String> pendingChatInput = new ConcurrentHashMap<>();
 
     public GUIListener(FluxHomes plugin) {
         this.plugin = plugin;
@@ -29,12 +31,15 @@ public class GUIListener implements Listener {
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player player)) return;
-
-        String title = PlainTextComponentSerializer.plainText()
-                .serialize(event.getView().title());
-        if (!title.equals(SettingsGUI.TITLE)) return;
+        if (!(event.getView().getTopInventory().getHolder() instanceof SettingsGUI.Holder)) return;
 
         event.setCancelled(true);
+        // a click in the player's own inventory below the menu has slot numbers of its own
+        if (event.getClickedInventory() != event.getView().getTopInventory()) return;
+        if (!player.hasPermission("fluxhomes.admin")) {
+            player.closeInventory();
+            return;
+        }
         if (event.getCurrentItem() == null) return;
 
         boolean left = event.isLeftClick();
@@ -93,6 +98,7 @@ public class GUIListener implements Listener {
         }
 
         plugin.getServer().getScheduler().runTask(plugin, () -> {
+            if (!player.hasPermission("fluxhomes.admin")) return;
             List<String> worlds = new ArrayList<>(plugin.getConfigUtil().getBlockedWorlds());
 
             if (mode.equals("add")) {
@@ -118,6 +124,12 @@ public class GUIListener implements Listener {
             player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.0f);
             SettingsGUI.open(player, plugin);
         });
+    }
+
+    /** An admin who leaves without answering is not asked any more (their next chat stays chat). */
+    @EventHandler
+    public void onQuit(PlayerQuitEvent event) {
+        pendingChatInput.remove(event.getPlayer().getUniqueId());
     }
 
     /**

@@ -332,7 +332,11 @@ public class HomeManager {
             return;
         }
 
-        player.teleport(loc);
+        // another plugin can stop it (combat tag, regions): then nothing happened, and no cooldown
+        if (!player.teleport(loc)) {
+            plugin.getMessageUtil().send(player, "teleport-stopped", "{home}", home.getName());
+            return;
+        }
 
         if (plugin.getConfigUtil().isTeleportSoundEnabled()) {
             player.playSound(loc, Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
